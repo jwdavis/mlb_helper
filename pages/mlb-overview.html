@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLB Race to October Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 640px;
+  }
+
+  /* --- Scenario cards: who needs what, right now --- */
+  .scenarios {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 72px;
+  }
+  .scenario {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 12px;
+    padding: 24px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+  .scenario.s1::before { background: var(--gc-blue); }
+  .scenario.s2::before { background: var(--gc-red); }
+  .scenario.s3::before { background: var(--gc-yellow); }
+  .scenario.s4::before { background: var(--gc-green); }
+
+  .scenario-who {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .scenario.s1 .scenario-who { color: var(--gc-blue); }
+  .scenario.s2 .scenario-who { color: var(--gc-red); }
+  .scenario.s3 .scenario-who { color: #B06000; } /* yellow needs darker for legibility */
+  .scenario.s4 .scenario-who { color: var(--gc-green); }
+
+  .scenario-quote {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.4;
+    color: var(--gc-ink);
+    letter-spacing: -0.005em;
+    margin-bottom: 16px;
+  }
+  .scenario-quote .q {
+    color: var(--gc-grey-3);
+    font-weight: 500;
+  }
+  .scenario-need {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--gc-grey-4);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.45;
+  }
+  .scenario-need strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  /* --- The setup line above scenarios --- */
+  .setup {
+    background: var(--gc-white);
+    border-left: 3px solid var(--gc-grey-3);
+    padding: 16px 22px;
+    margin-bottom: 32px;
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    line-height: 1.55;
+    border-radius: 0 8px 8px 0;
+  }
+  .setup strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  /* --- Principle callout --- */
+  .principle {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 40px 44px;
+    margin-bottom: 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .principle::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg,
+      var(--gc-blue) 0%, var(--gc-blue) 25%,
+      var(--gc-red) 25%, var(--gc-red) 50%,
+      var(--gc-yellow) 50%, var(--gc-yellow) 75%,
+      var(--gc-green) 75%, var(--gc-green) 100%);
+  }
+  .principle-statement {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+    max-width: 860px;
+  }
+  .principle-statement strong {
+    font-weight: 500;
+    color: var(--gc-blue);
+  }
+  .principle-sub {
+    margin-top: 18px;
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    max-width: 760px;
+    line-height: 1.6;
+  }
+
+  /* --- Architecture map: scenario → tier → tool --- */
+  .arch {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .arch-header {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1.3fr 1.5fr;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    background: var(--gc-grey-5);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+  }
+  .arch-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1.3fr 1.5fr;
+    padding: 22px 28px;
+    align-items: center;
+    border-bottom: 1px solid var(--gc-grey-4);
+    transition: background .15s ease;
+  }
+  .arch-row:last-child { border-bottom: none; }
+  .arch-row:hover { background: var(--gc-grey-5); }
+
+  .arch-audience {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .arch-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .arch-row.r1 .arch-dot { background: var(--gc-blue); }
+  .arch-row.r2 .arch-dot { background: var(--gc-red); }
+  .arch-row.r3 .arch-dot { background: var(--gc-yellow); }
+  .arch-row.r4 .arch-dot { background: var(--gc-green); }
+
+  .arch-audience-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--gc-ink);
+  }
+  .arch-audience-style {
+    font-size: 12px;
+    color: var(--gc-grey-1);
+    margin-top: 2px;
+  }
+
+  .arch-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: var(--gc-grey-5);
+    color: var(--gc-grey-1);
+  }
+  .arch-chip.pro {
+    background: var(--gc-blue-50);
+    color: var(--gc-blue);
+  }
+
+  .arch-tool {
+    font-size: 14px;
+    color: var(--gc-ink-2);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .arch-data {
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.45;
+  }
+  .arch-data .data-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    background: var(--gc-grey-5);
+    color: var(--gc-ink-2);
+    border: 1px solid var(--gc-grey-3);
+  }
+  .arch-row.r4 .data-tag {
+    background: var(--gc-green-50);
+    border-color: #B7E1C3;
+    color: #137333;
+  }
+
+  /* --- Closing --- */
+  .closing {
+    margin-top: 56px;
+    text-align: center;
+    padding: 0 40px;
+  }
+  .closing p {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--gc-ink-2);
+    letter-spacing: -0.005em;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .closing p em {
+    font-style: normal;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 1020px) {
+    .scenarios { grid-template-columns: repeat(2, 1fr); }
+    .arch-header, .arch-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 24px;
+      padding: 18px 22px;
+    }
+    .arch-header span:nth-child(3), .arch-header span:nth-child(4) { display: none; }
+    .arch-row > * { font-size: 13px; }
+  }
+  @media (max-width: 720px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .scenarios { grid-template-columns: 1fr; }
+    .principle { padding: 28px; }
+    .principle-statement { font-size: 20px; }
+    .section-title { font-size: 22px; }
+    .arch-header, .arch-row { grid-template-columns: 1fr; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>GenAI Stack</span>
+    <span class="sep">/</span>
+    <span>Reference Architecture</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Trade Deadline · Late July</span>
+      <h1>The MLB Race&nbsp;to&nbsp;October <span class="accent">Intelligence Platform</span></h1>
+    </div>
+    <p class="lede">
+      Two games out of the wild card. Deadline in days. The phones haven't stopped ringing —
+      and four very different people in the building all need an answer right now.
+    </p>
+  </header>
+
+  <!-- SECTION 1: The audiences and their questions -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Four people. Four questions. Same building.</h2>
+    </div>
+    <p class="section-sub">
+      Every question is urgent. Every question is different. The data to answer them all already exists —
+      every pitch and roster move since 1871 lives somewhere.
+    </p>
+
+    <div class="setup">
+      The challenge isn't getting the data. It's <strong>making it accessible —
+      to the right person, in the right form, at the right moment.</strong>
+    </div>
+
+    <div class="scenarios">
+
+      <article class="scenario s1">
+        <div class="scenario-who">The GM</div>
+        <p class="scenario-quote"><span class="q">“</span>What exactly are the waiver procedures here?<span class="q">”</span></p>
+        <div class="scenario-need">Needs a <strong>fast, grounded answer</strong> — pulled straight from the rulebook.</div>
+      </article>
+
+      <article class="scenario s2">
+        <div class="scenario-who">The Scouts</div>
+        <p class="scenario-quote"><span class="q">“</span>Give us a brief on this left-handed reliever.<span class="q">”</span></p>
+        <div class="scenario-need">Needs a <strong>structured, repeatable workflow</strong> — same shape every time.</div>
+      </article>
+
+      <article class="scenario s3">
+        <div class="scenario-who">Marketing</div>
+        <p class="scenario-quote"><span class="q">“</span>Fans keep asking about the player in the rumor mill.<span class="q">”</span></p>
+        <div class="scenario-need">Needs a <strong>public-facing concierge</strong> — multilingual, embeddable, at scale.</div>
+      </article>
+
+      <article class="scenario s4">
+        <div class="scenario-who">Data Science</div>
+        <p class="scenario-quote"><span class="q">“</span>What happens to our playoff odds if we make the deal?<span class="q">”</span></p>
+        <div class="scenario-need">Needs <strong>live analytics + predictions</strong> — BigQuery, BQML, the MLB Stats API.</div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2: The principle (now corrected) -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">What actually determines whether this works</h2>
+    </div>
+    <div class="principle">
+      <p class="principle-statement">
+        Modern AI capability is largely shaped by the model you pick —
+        but it's gated by the <strong>data underneath it.</strong>
+      </p>
+      <p class="principle-sub">
+        An agent that can't reach properly structured data doesn't give you insights —
+        it gives you confident hallucinations when the stakes are highest. Every architectural
+        decision in this build — what goes in a document store, what goes in BigQuery, which agent gets which tool —
+        is really a <strong style="color: var(--gc-ink-2); font-weight: 500;">data engineering decision.</strong>
+        Prompt engineering can polish at the margins; it can't reach data the agent isn't wired to.
+      </p>
+    </div>
+  </section>
+
+  <!-- SECTION 3: The architecture mapped to the people -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">How each question gets answered</h2>
+    </div>
+    <p class="section-sub">
+      Four tiers of the Google Cloud GenAI stack. The first three share an indexed data store —
+      the rulebook PDF and the player &amp; team profile corpus. The fourth reaches further.
+    </p>
+
+    <div class="arch">
+      <div class="arch-header">
+        <span>Audience</span>
+        <span>Style</span>
+        <span>Tool</span>
+        <span>Data it reaches</span>
+      </div>
+
+      <div class="arch-row r1">
+        <div class="arch-audience">
+          <span class="arch-dot"></span>
+          <div>
+            <div class="arch-audience-name">Front Office</div>
+            <div class="arch-audience-style">Tier 1 · Internal</div>
+          </div>
+        </div>
+        <div><span class="arch-chip">No-code</span></div>
+        <div class="arch-tool">Gemini Enterprise app</div>
+        <div class="arch-data">
+          <span class="data-tag">Rulebook</span>
+          <span class="data-tag">Profiles</span>
+        </div>
+      </div>
+
+      <div class="arch-row r2">
+        <div class="arch-audience">
+          <span class="arch-dot"></span>
+          <div>
+            <div class="arch-audience-name">Scouts</div>
+            <div class="arch-audience-style">Tier 2 · Internal</div>
+          </div>
+        </div>
+        <div><span class="arch-chip">No-code</span></div>
+        <div class="arch-tool">Gemini Enterprise · Agent Designer</div>
+        <div class="arch-data">
+          <span class="data-tag">Rulebook</span>
+          <span class="data-tag">Profiles</span>
+        </div>
+      </div>
+
+      <div class="arch-row r3">
+        <div class="arch-audience">
+          <span class="arch-dot"></span>
+          <div>
+            <div class="arch-audience-name">Fans</div>
+            <div class="arch-audience-style">Tier 3 · External</div>
+          </div>
+        </div>
+        <div><span class="arch-chip">No-code</span></div>
+        <div class="arch-tool">CX Agent Studio</div>
+        <div class="arch-data">
+          <span class="data-tag">Rulebook</span>
+          <span class="data-tag">Profiles</span>
+        </div>
+      </div>
+
+      <div class="arch-row r4">
+        <div class="arch-audience">
+          <span class="arch-dot"></span>
+          <div>
+            <div class="arch-audience-name">Data Science</div>
+            <div class="arch-audience-style">Tier 4 · Internal</div>
+          </div>
+        </div>
+        <div><span class="arch-chip pro">Pro-code</span></div>
+        <div class="arch-tool">Agent Development Kit on Agent Runtime</div>
+        <div class="arch-data">
+          <span class="data-tag">BigQuery</span>
+          <span class="data-tag">BQML</span>
+          <span class="data-tag">MLB Stats API</span>
+          <span class="data-tag">+ docs</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="closing">
+    <p>
+      The difference between what each tier can answer is a
+      <em>data architecture difference</em> —
+      not an AI capability difference.
+    </p>
+  </section>
+
+  <footer class="footer">
+    <span>MLB · Race to October Intelligence Platform</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>

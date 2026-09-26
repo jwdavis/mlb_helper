@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scaffold the Brief Agent · Agent Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 720px;
+    line-height: 1.55;
+  }
+
+  /* --- The scenario card --- */
+  .scenario {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 32px 40px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--gc-yellow);
+  }
+  .scenario-context {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B06000;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .scenario-statement {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 21px;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    max-width: 880px;
+  }
+  .scenario-statement strong {
+    font-weight: 500;
+    color: var(--gc-ink);
+  }
+  .scenario-callers {
+    display: flex;
+    gap: 28px;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gc-grey-4);
+    flex-wrap: wrap;
+  }
+  .caller {
+    display: flex;
+    flex-direction: column;
+  }
+  .caller-who {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--gc-ink);
+  }
+  .caller-what {
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    margin-top: 2px;
+  }
+
+  /* --- The three sections of the brief --- */
+  .brief {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 64px;
+  }
+  .brief-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--gc-grey-4);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .brief-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .brief-shape {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.04em;
+  }
+  .brief-shape strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .brief-sections {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .brief-section {
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 10px;
+    padding: 22px 22px 24px;
+    display: flex;
+    flex-direction: column;
+    background: var(--gc-bg);
+  }
+  .brief-section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gc-blue);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .brief-section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 8px;
+  }
+  .brief-section-desc {
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .brief-source {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--gc-grey-4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brief-source-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gc-grey-2);
+  }
+  .brief-source-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid #C6DAFC;
+    background: var(--gc-blue-50);
+    color: #1967D2;
+  }
+
+  /* --- How Agent Designer works --- */
+  .scaffold {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    margin-bottom: 32px;
+  }
+  .scaffold-side {
+    padding: 32px 32px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+  .scaffold-side.left {
+    background: var(--gc-grey-5);
+  }
+  .scaffold-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    background: var(--gc-white);
+    border-left: 1px solid var(--gc-grey-3);
+    border-right: 1px solid var(--gc-grey-3);
+  }
+  .scaffold-arrow-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gc-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+  }
+  .scaffold-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .scaffold-side.right .scaffold-tag { color: var(--gc-blue); }
+  .scaffold-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 8px;
+  }
+  .scaffold-desc {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+
+  /* Mock plain-language input */
+  .mock-input {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--gc-ink-2);
+    line-height: 1.55;
+    font-style: italic;
+    position: relative;
+  }
+  .mock-input::before {
+    content: "“";
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-size: 28px;
+    color: var(--gc-grey-3);
+    line-height: 1;
+  }
+  .mock-input-text {
+    padding-left: 14px;
+  }
+
+  /* Mock scaffold output */
+  .mock-output {
+    background: var(--gc-bg);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mock-field {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 12px;
+    align-items: center;
+    font-size: 13px;
+  }
+  .mock-field-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gc-grey-2);
+  }
+  .mock-field-value {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 4px;
+    padding: 5px 9px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-ink-2);
+  }
+  .mock-field-value.bars {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 7px 9px;
+  }
+  .mock-field-value.bars .bar {
+    height: 4px;
+    background: var(--gc-grey-3);
+    border-radius: 2px;
+  }
+  .mock-field-value.bars .bar:nth-child(1) { width: 90%; }
+  .mock-field-value.bars .bar:nth-child(2) { width: 70%; }
+  .mock-field-value.tools {
+    display: flex;
+    gap: 5px;
+    padding: 5px 9px;
+  }
+  .mock-tool-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: var(--gc-blue-50);
+    color: #1967D2;
+    border: 1px solid #C6DAFC;
+  }
+
+  /* --- The seed/iterate callout --- */
+  .seed-note {
+    background: var(--gc-blue-50);
+    border-left: 3px solid var(--gc-blue);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 26px;
+    margin-bottom: 56px;
+  }
+  .seed-note-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-blue);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .seed-note-text {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--gc-ink);
+    letter-spacing: -0.005em;
+    max-width: 880px;
+  }
+  .seed-note-text strong {
+    font-weight: 500;
+    color: var(--gc-blue);
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+    .brief-sections { grid-template-columns: 1fr; }
+    .scaffold { grid-template-columns: 1fr; }
+    .scaffold-arrow {
+      border-left: none;
+      border-right: none;
+      border-top: 1px solid var(--gc-grey-3);
+      border-bottom: 1px solid var(--gc-grey-3);
+      padding: 12px 0;
+    }
+    .scaffold-arrow-circle { transform: rotate(90deg); }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .scenario { padding: 26px 24px; }
+    .scenario-statement { font-size: 17px; }
+    .section-title { font-size: 22px; }
+    .brief { padding: 26px 24px; }
+    .scaffold-side { padding: 24px; }
+    .mock-field { grid-template-columns: 1fr; gap: 4px; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>Gemini Enterprise</span>
+    <span class="sep">/</span>
+    <span>Agent Designer</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Task 2 · Scaffold the brief agent</span>
+      <h1>Describe it in <span class="accent">plain language.</span> Let it scaffold the rest.</h1>
+    </div>
+    <p class="lede">
+      Agent Designer turns a plain-language description into a working starting point —
+      name, instructions, tool selection — that you then refine.
+    </p>
+  </header>
+
+  <!-- SECTION 1: The scenario -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">The scenario</h2>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-context">Trade deadline · Names coming in fast</div>
+      <p class="scenario-statement">
+        The front office is heading into the trade deadline. Names come in fast.
+        For each one, the front office wants the
+        <strong>same kind of brief — three sections, every time —</strong>
+        pulled from the same two stores, regardless of who's asking or which player they're asking about.
+      </p>
+      <div class="scenario-callers">
+        <div class="caller">
+          <span class="caller-who">Agents</span>
+          <span class="caller-what">Calling about availability</span>
+        </div>
+        <div class="caller">
+          <span class="caller-who">Scouts</span>
+          <span class="caller-what">Flagging targets</span>
+        </div>
+        <div class="caller">
+          <span class="caller-who">The GM</span>
+          <span class="caller-what">Asking for quick reads</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: The brief -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">The brief, same shape every time</h2>
+    </div>
+
+    <div class="brief">
+      <div class="brief-header">
+        <div class="brief-name">Player Scouting Brief</div>
+        <div class="brief-shape"><strong>Input:</strong> player_name &nbsp;·&nbsp; <strong>Output:</strong> three sections</div>
+      </div>
+
+      <div class="brief-sections">
+        <article class="brief-section">
+          <div class="brief-section-num">01</div>
+          <h3 class="brief-section-title">Career Overview</h3>
+          <p class="brief-section-desc">Who they are, their career arc, the teams they've played for.</p>
+          <div class="brief-source">
+            <span class="brief-source-label">Source</span>
+            <span class="brief-source-tag">Profiles store</span>
+          </div>
+        </article>
+
+        <article class="brief-section">
+          <div class="brief-section-num">02</div>
+          <h3 class="brief-section-title">Strengths &amp; Achievements</h3>
+          <p class="brief-section-desc">What makes them notable — awards, milestones, signature strengths.</p>
+          <div class="brief-source">
+            <span class="brief-source-label">Source</span>
+            <span class="brief-source-tag">Profiles store</span>
+          </div>
+        </article>
+
+        <article class="brief-section">
+          <div class="brief-section-num">03</div>
+          <h3 class="brief-section-title">Rulebook Context</h3>
+          <p class="brief-section-desc">Official rules considerations relevant to evaluating this player at their position.</p>
+          <div class="brief-source">
+            <span class="brief-source-label">Source</span>
+            <span class="brief-source-tag">Rulebook store</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: How Agent Designer works -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">How you'll build it</h2>
+    </div>
+    <p class="section-sub">
+      Rather than manually filling out a long form, you describe the agent you want — and Agent Designer scaffolds the configuration for you.
+    </p>
+
+    <div class="scaffold">
+      <div class="scaffold-side left">
+        <div class="scaffold-tag">You write</div>
+        <h3 class="scaffold-title">A plain-language description</h3>
+        <p class="scaffold-desc">In your own words. The agent's purpose, the data it should reach, the shape of the output.</p>
+        <div class="mock-input">
+          <div class="mock-input-text">
+            Given a player's name, produce a three-section scouting brief: career overview, strengths and achievements, rulebook context. Use the profiles and rulebook stores…
+          </div>
+        </div>
+      </div>
+
+      <div class="scaffold-arrow">
+        <div class="scaffold-arrow-circle">→</div>
+      </div>
+
+      <div class="scaffold-side right">
+        <div class="scaffold-tag">Agent Designer generates</div>
+        <h3 class="scaffold-title">A starting configuration</h3>
+        <p class="scaffold-desc">A scaffolded agent you can then refine: name, description, instructions, tool selection — all pre-filled.</p>
+        <div class="mock-output">
+          <div class="mock-field">
+            <span class="mock-field-label">Name</span>
+            <span class="mock-field-value">player_brief_agent</span>
+          </div>
+          <div class="mock-field">
+            <span class="mock-field-label">Description</span>
+            <span class="mock-field-value bars">
+              <span class="bar"></span>
+              <span class="bar"></span>
+            </span>
+          </div>
+          <div class="mock-field">
+            <span class="mock-field-label">Instructions</span>
+            <span class="mock-field-value bars">
+              <span class="bar"></span>
+              <span class="bar"></span>
+            </span>
+          </div>
+          <div class="mock-field">
+            <span class="mock-field-label">Tools</span>
+            <span class="mock-field-value tools">
+              <span class="mock-tool-tag">profiles</span>
+              <span class="mock-tool-tag">rulebook</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="seed-note">
+      <div class="seed-note-label">Important</div>
+      <p class="seed-note-text">
+        The description you paste isn't the final agent. It's the <strong>seed —</strong>
+        something concrete to iterate from, not a finished spec.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Task 2 · Scaffold the brief agent</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>

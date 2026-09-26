@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reading the Instructions · Fan Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 720px;
+    line-height: 1.55;
+  }
+
+  /* --- Five instruction sections --- */
+  .instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 64px;
+  }
+  .instr {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 12px;
+    padding: 24px 28px 26px;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .instr-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--gc-grey-3);
+    padding-top: 2px;
+  }
+  .instr.scope     .instr-num { color: var(--gc-blue); }
+  .instr.tool      .instr-num { color: var(--gc-green); }
+  .instr.tone      .instr-num { color: var(--gc-yellow); }
+  .instr.oos       .instr-num { color: var(--gc-red); }
+  .instr.lang      .instr-num { color: #9334E6; } /* purple — 5th color */
+
+  .instr-body { display: flex; flex-direction: column; }
+  .instr-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .instr-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+  }
+  .instr-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .instr.scope .instr-label  { background: var(--gc-blue-50); color: var(--gc-blue); }
+  .instr.tool .instr-label   { background: var(--gc-green-50); color: #137333; }
+  .instr.tone .instr-label   { background: var(--gc-yellow-50); color: #B06000; }
+  .instr.oos .instr-label    { background: var(--gc-red-50); color: #C5221F; }
+  .instr.lang .instr-label   { background: #F3E8FD; color: #9334E6; }
+
+  .instr-flag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    background: var(--gc-ink);
+    color: white;
+    font-weight: 500;
+  }
+
+  .instr-desc {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+  .instr-desc strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .instr-detail {
+    background: var(--gc-grey-5);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--gc-ink-2);
+    line-height: 1.5;
+    font-family: var(--font-mono);
+  }
+  .instr-detail code {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--gc-blue);
+  }
+
+  /* --- Tone callout: same data, different register --- */
+  .voice-shift {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .voice-shift::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--gc-yellow);
+  }
+  .voice-shift-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B06000;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .voice-shift-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+    margin-bottom: 24px;
+  }
+
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .voice-card {
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 10px;
+    padding: 20px 22px 22px;
+    background: var(--gc-bg);
+    display: flex;
+    flex-direction: column;
+  }
+  .voice-who {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .voice-register {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--gc-ink);
+    letter-spacing: -0.005em;
+    margin-bottom: 12px;
+  }
+  .voice-sample {
+    font-family: var(--font-display);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--gc-grey-1);
+    font-style: italic;
+    padding-left: 14px;
+    border-left: 2px solid var(--gc-grey-3);
+  }
+  .voice-card.scout .voice-register { color: var(--gc-ink); }
+  .voice-card.fan .voice-register { color: var(--gc-yellow); color: #B06000; }
+
+  .voice-takeaway {
+    padding-top: 20px;
+    border-top: 1px solid var(--gc-grey-4);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--gc-ink-2);
+    letter-spacing: -0.005em;
+  }
+  .voice-takeaway strong {
+    color: var(--gc-ink);
+    font-weight: 500;
+  }
+  .voice-takeaway em {
+    font-style: normal;
+    color: var(--gc-yellow);
+    color: #B06000;
+    font-weight: 500;
+  }
+
+  /* --- The contract: what's NOT in the instructions --- */
+  .contract {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 32px;
+  }
+  .contract-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .contract-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    font-weight: 500;
+  }
+  .contract-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+
+  .contract-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .contract-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 8px;
+    background: var(--gc-grey-5);
+  }
+  .contract-x {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gc-red-50);
+    color: var(--gc-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .contract-text {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-ink-2);
+  }
+
+  .contract-rule {
+    background: var(--gc-blue-50);
+    border-left: 3px solid var(--gc-blue);
+    border-radius: 0 10px 10px 0;
+    padding: 20px 24px;
+  }
+  .contract-rule-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-blue);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .contract-rule-text {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--gc-ink);
+    letter-spacing: -0.005em;
+  }
+  .contract-rule-text strong {
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+    .voice-grid { grid-template-columns: 1fr; }
+    .contract-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .section-title { font-size: 22px; }
+    .instr {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 22px 22px 22px;
+    }
+    .instr-num { font-size: 28px; }
+    .voice-shift { padding: 26px 24px; }
+    .contract { padding: 26px 24px; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>CX Agent Studio</span>
+    <span class="sep">/</span>
+    <span>Agent Instructions</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Task 3 · Reading the instructions</span>
+      <h1>Five sections, <span class="accent">five jobs.</span></h1>
+    </div>
+    <p class="lede">
+      The instructions you just pasted aren't one block of prose — they're five parts,
+      each doing distinct work. Here's what each one does and why it's there.
+    </p>
+  </header>
+
+  <!-- SECTION 1: The five instruction parts -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">What each section does</h2>
+    </div>
+
+    <div class="instructions">
+
+      <article class="instr scope">
+        <div class="instr-num">01</div>
+        <div class="instr-body">
+          <div class="instr-head">
+            <span class="instr-title">Scope</span>
+            <span class="instr-label">What the agent answers</span>
+          </div>
+          <p class="instr-desc">Two question types — <strong>player and team history</strong>, and <strong>the rules of baseball.</strong> Anything outside that is out of scope by definition.</p>
+        </div>
+      </article>
+
+      <article class="instr tool">
+        <div class="instr-num">02</div>
+        <div class="instr-body">
+          <div class="instr-head">
+            <span class="instr-title">Tool usage</span>
+            <span class="instr-label">How it gets the answer</span>
+          </div>
+          <p class="instr-desc">The agent must use the <strong>profiles_and_rules</strong> tool. Every factual claim has to trace back to a retrieved chunk.</p>
+          <div class="instr-detail">
+            <code>{@TOOL: profiles_and_rules}</code> &nbsp;·&nbsp; CX Agent Studio syntax — resolves at runtime to tell the model which tool to invoke
+          </div>
+        </div>
+      </article>
+
+      <article class="instr tone">
+        <div class="instr-num">03</div>
+        <div class="instr-body">
+          <div class="instr-head">
+            <span class="instr-title">Tone</span>
+            <span class="instr-label">The audience pivot</span>
+          </div>
+          <p class="instr-desc">Fan-voiced, warm, enthusiastic. <strong>Different register from the scouting brief agent's analyst voice</strong> — same data, different audience.</p>
+        </div>
+      </article>
+
+      <article class="instr oos">
+        <div class="instr-num">04</div>
+        <div class="instr-body">
+          <div class="instr-head">
+            <span class="instr-title">Out-of-scope handling</span>
+            <span class="instr-flag">Most important</span>
+          </div>
+          <p class="instr-desc">Tells the agent exactly what to do when fans ask about current state: <strong>defer politely, redirect to authoritative sources, offer to help with what's in scope.</strong></p>
+        </div>
+      </article>
+
+      <article class="instr lang">
+        <div class="instr-num">05</div>
+        <div class="instr-body">
+          <div class="instr-head">
+            <span class="instr-title">Language matching</span>
+            <span class="instr-label">Mirror the user</span>
+          </div>
+          <p class="instr-desc">Explicit instruction to mirror the user's language. The model already detects 40+ languages organically — this paragraph makes the behavior <strong>reliable, not just probable.</strong></p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2: The voice pivot, expanded -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Why the tone bullet matters more than it looks</h2>
+    </div>
+    <p class="section-sub">
+      Same documents, same retrieval. Different register on top.
+      That register is what turns shared infrastructure into audience-specific product.
+    </p>
+
+    <div class="voice-shift">
+      <div class="voice-shift-tag">Same data · Two voices</div>
+      <h3 class="voice-shift-title">The retrieval is identical. The persona is not.</h3>
+
+      <div class="voice-grid">
+        <article class="voice-card scout">
+          <div class="voice-who">Task 2 · Scouting Brief</div>
+          <div class="voice-register">Structured analyst voice</div>
+          <p class="voice-sample">Veteran outfielder. Three-time All-Star. Career OPS+ of 124. Key rules consideration: outfield interference under Rule 6.01(d)…</p>
+        </article>
+
+        <article class="voice-card fan">
+          <div class="voice-who">Task 3 · Fan Agent</div>
+          <div class="voice-register">Fan-voiced enthusiasm</div>
+          <p class="voice-sample">Oh, you're going to love this guy — three-time All-Star, the kind of outfielder who turns a double into a single just by being out there…</p>
+        </article>
+      </div>
+
+      <p class="voice-takeaway">
+        <strong>Voice is not decoration.</strong> It's the layer that makes one agent useful for scouts
+        and the other useful for fans — using the <em>exact same documents underneath.</em>
+      </p>
+    </div>
+  </section>
+
+  <!-- SECTION 3: The contract — what's NOT there -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Notice what's not in the instructions</h2>
+    </div>
+
+    <div class="contract">
+      <div class="contract-head">
+        <span class="contract-tag">By design · Not omission</span>
+        <h3 class="contract-title">No external reach</h3>
+      </div>
+
+      <div class="contract-grid">
+        <div class="contract-item">
+          <span class="contract-x">✕</span>
+          <span class="contract-text">No Google Search tool</span>
+        </div>
+        <div class="contract-item">
+          <span class="contract-x">✕</span>
+          <span class="contract-text">No open-web fallback</span>
+        </div>
+      </div>
+
+      <div class="contract-rule">
+        <div class="contract-rule-label">The contract</div>
+        <p class="contract-rule-text">
+          When the documents are the source of authority,
+          <strong>the agent answers from the documents — or it doesn't answer.</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Task 3 · Reading the instructions</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>

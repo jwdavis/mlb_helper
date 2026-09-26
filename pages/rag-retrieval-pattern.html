@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG · The Retrieval Pattern</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+  .eyebrow .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gc-green);
+    margin-right: 8px;
+    transform: translateY(-1px);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 680px;
+    line-height: 1.55;
+  }
+
+  /* --- The ingestion pipeline --- */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .stage {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    padding: 24px 22px 26px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+  .stage:first-child { border-radius: 12px 0 0 12px; }
+  .stage:last-child { border-radius: 0 12px 12px 0; }
+  .stage:not(:first-child) { border-left: none; }
+
+  /* Connector arrows between stages */
+  .stage:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -7px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: var(--gc-bg);
+    border-top: 1px solid var(--gc-grey-3);
+    border-right: 1px solid var(--gc-grey-3);
+    transform: translateY(-50%) rotate(45deg);
+    z-index: 2;
+  }
+
+  .stage-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--gc-blue);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .stage-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 10px;
+  }
+  .stage-desc {
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .stage-visual {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--gc-grey-4);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Stage 1: a document line */
+  .v-doc {
+    width: 28px;
+    height: 36px;
+    border: 1.5px solid var(--gc-grey-2);
+    border-radius: 2px;
+    position: relative;
+    background: var(--gc-white);
+  }
+  .v-doc::before, .v-doc::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    height: 1.5px;
+    background: var(--gc-grey-3);
+  }
+  .v-doc::before { top: 8px; }
+  .v-doc::after { top: 14px; box-shadow: 0 6px 0 var(--gc-grey-3), 0 12px 0 var(--gc-grey-3); }
+  .v-doc-label {
+    margin-left: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gc-grey-2);
+  }
+
+  /* Stage 2: chunks */
+  .v-chunks {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .v-chunk {
+    width: 50px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--gc-blue-50);
+    border: 1px solid #C6DAFC;
+  }
+  .v-chunk:nth-child(2) { width: 42px; }
+  .v-chunk:nth-child(3) { width: 56px; }
+
+  /* Stage 3: vectors */
+  .v-vectors {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--gc-blue);
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+  }
+  .v-vectors div { white-space: nowrap; }
+
+  /* Stage 4: index */
+  .v-index {
+    display: grid;
+    grid-template-columns: repeat(4, 8px);
+    gap: 3px;
+  }
+  .v-index span {
+    width: 8px; height: 8px;
+    border-radius: 1px;
+    background: var(--gc-blue-50);
+    border: 1px solid #C6DAFC;
+  }
+  .v-index span:nth-child(3),
+  .v-index span:nth-child(7),
+  .v-index span:nth-child(10) {
+    background: var(--gc-blue);
+    border-color: var(--gc-blue);
+  }
+
+  /* --- Pipeline caption --- */
+  .pipeline-caption {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    text-align: center;
+    letter-spacing: 0.04em;
+    margin-bottom: 64px;
+  }
+  .pipeline-caption strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+    font-family: var(--font-display);
+    letter-spacing: -0.005em;
+  }
+
+  /* --- RAG explainer card --- */
+  .rag-card {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 40px 44px;
+    margin-bottom: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .rag-card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--gc-blue);
+  }
+  .rag-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-blue);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .rag-statement {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+    max-width: 880px;
+    margin-bottom: 28px;
+  }
+  .rag-statement strong {
+    font-weight: 500;
+    color: var(--gc-ink);
+  }
+
+  /* The split: model reasons, docs remember */
+  .rag-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--gc-grey-4);
+  }
+  .rag-half {
+    display: flex;
+    flex-direction: column;
+  }
+  .rag-half-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-2);
+    margin-bottom: 8px;
+  }
+  .rag-half-who {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--gc-ink);
+    margin-bottom: 6px;
+  }
+  .rag-half-who .verb {
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .rag-half-desc {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+  }
+
+  /* --- The two halves of RAG: split block --- */
+  .halves {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 56px;
+  }
+  .half {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 12px;
+    padding: 26px 28px;
+  }
+  .half-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .half.built .half-label { color: var(--gc-green); }
+  .half.lives .half-label { color: var(--gc-grey-1); }
+  .half-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 8px;
+  }
+  .half-where {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+  }
+  .half-where strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+  .half.built .check {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--gc-green);
+    margin-right: 8px;
+    vertical-align: -3px;
+    position: relative;
+  }
+  .half.built .check::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 8px;
+    width: 4px;
+    height: 7px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(45deg);
+  }
+
+  /* --- Status bar: rulebook done, profiles ingesting --- */
+  .status {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 12px;
+    padding: 22px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  .status-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .status-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .status-pill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .status-pill.done {
+    background: var(--gc-green-50);
+    color: #137333;
+  }
+  .status-pill.running {
+    background: var(--gc-yellow-50);
+    color: #B06000;
+  }
+  .status-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--gc-ink);
+  }
+  .status-meta {
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+  }
+  .status-meta strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .next {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--gc-grey-4);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+    grid-column: 1 / -1;
+  }
+  .next strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+    .pipeline { grid-template-columns: repeat(2, 1fr); }
+    .stage:nth-child(1) { border-radius: 12px 0 0 0; }
+    .stage:nth-child(2) { border-radius: 0 12px 0 0; border-left: none; }
+    .stage:nth-child(3) { border-radius: 0 0 0 12px; border-top: none; }
+    .stage:nth-child(4) { border-radius: 0 0 12px 0; border-left: none; border-top: none; }
+    .stage:nth-child(2)::after { display: none; }
+    .stage:nth-child(2) { border-left: 1px solid var(--gc-grey-3); }
+    .stage:nth-child(4) { border-left: 1px solid var(--gc-grey-3); }
+  }
+  @media (max-width: 640px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .pipeline { grid-template-columns: 1fr; }
+    .stage { border-radius: 0 !important; border-left: 1px solid var(--gc-grey-3) !important; border-top: 1px solid var(--gc-grey-3) !important; }
+    .stage:first-child { border-radius: 12px 12px 0 0 !important; }
+    .stage:last-child { border-radius: 0 0 12px 12px !important; }
+    .stage:not(:first-child) { border-top: none !important; }
+    .stage:not(:last-child)::after {
+      right: 50%;
+      top: auto;
+      bottom: -7px;
+      transform: translateX(50%) rotate(135deg);
+    }
+    .rag-card { padding: 28px; }
+    .rag-statement { font-size: 18px; }
+    .rag-split { grid-template-columns: 1fr; gap: 18px; }
+    .halves { grid-template-columns: 1fr; }
+    .status { grid-template-columns: 1fr; gap: 18px; }
+    .section-title { font-size: 22px; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>Gemini Enterprise</span>
+    <span class="sep">/</span>
+    <span>Retrieval Pipeline</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Ingestion running</span>
+      <h1>What's happening <span class="accent">behind the scenes</span></h1>
+    </div>
+    <p class="lede">
+      Gemini Enterprise is building a retrieval index over your documents right now.
+      This is the pattern that sits underneath most enterprise AI today — RAG.
+    </p>
+  </header>
+
+  <!-- SECTION 1: The pipeline -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">The ingestion pipeline, in four steps</h2>
+    </div>
+    <p class="section-sub">
+      Every document goes through the same four stages before it's queryable.
+      This is the industrial version of the retrieval pipeline underneath most enterprise AI today.
+    </p>
+
+    <div class="pipeline">
+
+      <div class="stage">
+        <div class="stage-num">01 · PARSE</div>
+        <h3 class="stage-title">Read each document</h3>
+        <p class="stage-desc">Extract clean text from rulebooks, profiles, records.</p>
+        <div class="stage-visual">
+          <div class="v-doc"></div>
+          <div class="v-doc-label">.pdf · .txt</div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">02 · CHUNK</div>
+        <h3 class="stage-title">Break into retrieval-sized pieces</h3>
+        <p class="stage-desc">Split content into passages small enough to be precise, large enough to carry meaning.</p>
+        <div class="stage-visual">
+          <div class="v-chunks">
+            <span class="v-chunk"></span>
+            <span class="v-chunk"></span>
+            <span class="v-chunk"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">03 · EMBED</div>
+        <h3 class="stage-title">Generate a vector per chunk</h3>
+        <p class="stage-desc">Each chunk becomes a numeric fingerprint that captures its meaning.</p>
+        <div class="stage-visual">
+          <div class="v-vectors">
+            <div>[ 0.14, −0.82, … ]</div>
+            <div>[ 0.07, &nbsp;&nbsp;0.31, … ]</div>
+            <div>[ −0.55, 0.09, … ]</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-num">04 · INDEX</div>
+        <h3 class="stage-title">Build a searchable index</h3>
+        <p class="stage-desc">At query time, the platform pulls back the chunks closest in meaning.</p>
+        <div class="stage-visual">
+          <div class="v-index">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="pipeline-caption">
+      Documents in <span style="margin: 0 6px;">→</span> <strong>searchable meaning</strong> out
+    </p>
+  </section>
+
+  <!-- SECTION 2: What RAG actually is -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">This pattern has a name: RAG</h2>
+    </div>
+
+    <div class="rag-card">
+      <div class="rag-tag">Retrieval-Augmented Generation</div>
+      <p class="rag-statement">
+        LLMs reason well over text — but they don't know your documents,
+        and they can't be trusted to invent specifics. RAG fixes that by
+        <strong>retrieving the most relevant chunks at query time</strong>
+        and giving them to the model as grounding.
+      </p>
+
+      <div class="rag-split">
+        <div class="rag-half">
+          <div class="rag-half-label">The split</div>
+          <div class="rag-half-who">The model <span class="verb">does the reasoning</span></div>
+          <p class="rag-half-desc">It reads the retrieved passages and composes an answer.</p>
+        </div>
+        <div class="rag-half">
+          <div class="rag-half-label">&nbsp;</div>
+          <div class="rag-half-who">The documents <span class="verb">do the remembering</span></div>
+          <p class="rag-half-desc">That's why answers can cite specific sources — the citations are the chunks handed to the model.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: You've built the retrieval half -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">You just built the retrieval half</h2>
+    </div>
+    <p class="section-sub">
+      RAG has two halves. One you've just built. The other lives inside Gemini Enterprise's chat surface — and inside every agent you'll build on top of it.
+    </p>
+
+    <div class="halves">
+      <article class="half built">
+        <div class="half-label"><span class="check"></span>Built in this task</div>
+        <h3 class="half-title">Retrieval</h3>
+        <p class="half-where">Documents parsed, chunked, embedded, and indexed.
+          <strong>Lives in your data stores.</strong></p>
+      </article>
+
+      <article class="half lives">
+        <div class="half-label">Provided by the platform</div>
+        <h3 class="half-title">Generation</h3>
+        <p class="half-where">The model reads retrieved chunks and answers.
+          <strong>Lives inside Gemini Enterprise's chat surface and every agent built on top of it.</strong></p>
+      </article>
+    </div>
+
+    <!-- Ingestion status -->
+    <div class="status">
+      <div class="status-item">
+        <div class="status-top">
+          <span class="status-pill done">✓ Done</span>
+          <span class="status-name">Rulebook</span>
+        </div>
+        <p class="status-meta">A single PDF. <strong>Ingestion already complete.</strong></p>
+      </div>
+      <div class="status-item">
+        <div class="status-top">
+          <span class="status-pill running">● Running</span>
+          <span class="status-name">Profile corpus</span>
+        </div>
+        <p class="status-meta">~24,000 files. <strong>About 15 minutes</strong> to finish.</p>
+      </div>
+      <div class="next">
+        <strong>While you wait →</strong> load and model the structured data in the rest of this task.
+        By the time you're done, the profile index will be ready.
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Task 1 · Retrieval Pipeline</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>

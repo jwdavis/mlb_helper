@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MLB Helper · Infographics</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --sidebar-bg: #0f1a2e;
+      --sidebar-border: #1f2d45;
+      --text: #e6edf6;
+      --muted: #8aa0bd;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.16);
+      --hover: rgba(255, 255, 255, 0.05);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ---------- Sidebar (20%) ---------- */
+    .sidebar {
+      width: 20%;
+      min-width: 240px;
+      max-width: 360px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding: 22px 20px 16px;
+      border-bottom: 1px solid var(--sidebar-border);
+      position: sticky;
+      top: 0;
+      background: var(--sidebar-bg);
+      z-index: 1;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .brand p {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    nav { padding: 10px 0 24px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 11px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+    .nav-item:hover { background: var(--hover); }
+    .nav-item.active {
+      background: var(--accent-soft);
+      border-left-color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-num {
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .nav-item.active .nav-num {
+      background: var(--accent);
+      color: #fff;
+    }
+    .nav-label { line-height: 1.3; }
+
+    /* ---------- Content (80%) ---------- */
+    .content {
+      flex: 1;
+      position: relative;
+      background: #fff;
+    }
+    .content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ---------- Mobile ---------- */
+    @media (max-width: 720px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; max-width: none; height: auto; max-height: 45vh; border-right: none; border-bottom: 1px solid var(--sidebar-border); }
+      .content { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>MLB Helper</h1>
+        <p>Race to October · Infographics</p>
+      </div>
+      <nav>
+        {% for filename, title in pages %}
+        <button class="nav-item{% if loop.first %} active{% endif %}"
+                data-src="{{ url_for('page', filename=filename) }}">
+          <span class="nav-num">{{ loop.index }}</span>
+          <span class="nav-label">{{ title }}</span>
+        </button>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <main class="content">
+      <iframe id="viewer" title="Infographic viewer"></iframe>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var viewer = document.getElementById("viewer");
+      var items = document.querySelectorAll(".nav-item");
+
+      function select(item) {
+        items.forEach(function (el) { el.classList.remove("active"); });
+        item.classList.add("active");
+        viewer.src = item.getAttribute("data-src");
+      }
+
+      items.forEach(function (item) {
+        item.addEventListener("click", function () { select(item); });
+      });
+
+      // Load the first page on startup.
+      if (items.length) { viewer.src = items[0].getAttribute("data-src"); }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fan-Facing Agent · CX Agent Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 720px;
+    line-height: 1.55;
+  }
+
+  /* --- Inside vs Outside the building --- */
+  .audience-shift {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 64px;
+    position: relative;
+  }
+  .shift-side {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 32px 32px 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .shift-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .shift-side.inside .shift-tag { color: var(--gc-grey-1); }
+  .shift-side.outside .shift-tag { color: var(--gc-blue); }
+  .shift-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+    margin-bottom: 16px;
+  }
+  .shift-side.outside .shift-title .accent {
+    color: var(--gc-blue);
+  }
+
+  .shift-traits {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .shift-traits li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 14px;
+    color: var(--gc-ink-2);
+    line-height: 1.45;
+  }
+  .trait-dot {
+    flex-shrink: 0;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 8px;
+  }
+  .shift-side.inside .trait-dot { background: var(--gc-grey-3); }
+  .shift-side.outside .trait-dot { background: var(--gc-blue); }
+
+  .shift-trait-strong {
+    font-weight: 500;
+    color: var(--gc-ink);
+  }
+
+  /* --- Requirements grid: differences → requirements --- */
+  .req-table {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 64px;
+  }
+  .req-header {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    background: var(--gc-grey-5);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+  }
+  .req-row {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    padding: 22px 28px;
+    align-items: center;
+    border-bottom: 1px solid var(--gc-grey-4);
+    transition: background .15s ease;
+  }
+  .req-row:last-child { border-bottom: none; }
+  .req-row:hover { background: var(--gc-grey-5); }
+
+  .req-diff {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.45;
+  }
+  .req-diff strong {
+    color: var(--gc-ink);
+    font-weight: 500;
+  }
+
+  .req-arrow {
+    display: inline-block;
+    color: var(--gc-grey-2);
+    margin: 0 8px;
+  }
+
+  .req-need {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gc-ink);
+    letter-spacing: -0.005em;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .req-icon {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--gc-blue-50);
+    color: var(--gc-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* --- What changes / What stays --- */
+  .deployment {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 64px;
+  }
+  .deploy-side {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 32px 32px 30px;
+  }
+  .deploy-side.stays { background: var(--gc-green-50); border-color: #B7E1C3; }
+  .deploy-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .deploy-side.stays .deploy-tag { color: #137333; }
+  .deploy-side.changes .deploy-tag { color: var(--gc-blue); }
+
+  .deploy-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 20px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 16px;
+  }
+  .deploy-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .deploy-item {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .deploy-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding-top: 2px;
+  }
+  .deploy-value {
+    color: var(--gc-ink-2);
+  }
+  .deploy-value strong {
+    color: var(--gc-ink);
+    font-weight: 500;
+  }
+  .deploy-side.stays .deploy-value strong { color: #137333; }
+
+  /* --- The four subtasks --- */
+  .subtasks {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 32px 36px;
+  }
+  .subtasks-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--gc-grey-4);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .subtasks-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+  }
+  .subtasks-time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.04em;
+  }
+  .subtasks-time strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .subtask-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .subtask {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--gc-grey-5);
+    border-radius: 8px;
+  }
+  .subtask-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--gc-blue);
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+  .subtask.optional .subtask-num { color: var(--gc-grey-2); }
+
+  .subtask-text {
+    font-size: 14px;
+    color: var(--gc-ink-2);
+    line-height: 1.4;
+  }
+  .subtask-text strong {
+    color: var(--gc-ink);
+    font-weight: 500;
+  }
+  .subtask-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 100px;
+    background: var(--gc-grey-3);
+    color: var(--gc-grey-1);
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+    .audience-shift { grid-template-columns: 1fr; }
+    .deployment { grid-template-columns: 1fr; }
+    .req-header, .req-row { grid-template-columns: 1fr; gap: 8px; padding: 18px 22px; }
+    .req-header span:nth-child(2) { display: none; }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .section-title { font-size: 22px; }
+    .deploy-item { grid-template-columns: 1fr; gap: 4px; }
+    .subtasks { padding: 24px 22px; }
+    .subtask { grid-template-columns: 28px 1fr; }
+    .subtask-badge { grid-column: 2; justify-self: start; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>Task 3</span>
+    <span class="sep">/</span>
+    <span>CX Agent Studio</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Task 3 · The fan-facing agent</span>
+      <h1>Outside the building, <span class="accent">the calculus changes.</span></h1>
+    </div>
+    <p class="lede">
+      Same data foundation, different audience. Millions of fans, untrained and anonymous,
+      asking in dozens of languages — and none of them will tolerate a confidently wrong answer.
+    </p>
+  </header>
+
+  <!-- SECTION 1: Audience shift -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Who you're now building for</h2>
+    </div>
+
+    <div class="audience-shift">
+      <article class="shift-side inside">
+        <div class="shift-tag">Tasks 1 &amp; 2 — Inside the building</div>
+        <h3 class="shift-title">A small, known population</h3>
+        <ul class="shift-traits">
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">Trained on the tool.</span> You can teach the limits.</div></li>
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">Known users.</span> Front office, scouts — a finite list.</div></li>
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">Workarounds available.</span> For the questions documents can't answer.</div></li>
+        </ul>
+      </article>
+
+      <article class="shift-side outside">
+        <div class="shift-tag">Task 3 — Outside the building</div>
+        <h3 class="shift-title">Millions, <span class="accent">untrained &amp; anonymous</span></h3>
+        <ul class="shift-traits">
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">Anonymous users.</span> No login, no profile, no history.</div></li>
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">Dozens of languages.</span> The whole fanbase, not just English.</div></li>
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">No documentation read.</span> No tolerance for hallucination.</div></li>
+          <li><span class="trait-dot"></span><div><span class="shift-trait-strong">No admin chrome.</span> They want a fan experience, not an admin tool.</div></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Differences translate into requirements -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Each difference becomes a requirement</h2>
+    </div>
+    <p class="section-sub">
+      Four shifts in the audience map to four concrete architectural requirements — plus one constant that ties them all together.
+    </p>
+
+    <div class="req-table">
+      <div class="req-header">
+        <span>The difference</span>
+        <span>What it requires</span>
+      </div>
+
+      <div class="req-row">
+        <div class="req-diff">No <strong>admin chrome</strong> on a public site</div>
+        <div class="req-need">
+          <span class="req-icon">◧</span>
+          An embeddable widget, not a separate console
+        </div>
+      </div>
+
+      <div class="req-row">
+        <div class="req-diff">Fans ask in <strong>dozens of languages</strong></div>
+        <div class="req-need">
+          <span class="req-icon">A文</span>
+          Multilingual support out of the box
+        </div>
+      </div>
+
+      <div class="req-row">
+        <div class="req-diff">A fan audience, not an analyst audience</div>
+        <div class="req-need">
+          <span class="req-icon">♥</span>
+          A friendly, <strong style="font-weight:500;color:var(--gc-ink);">fan-voiced persona</strong> — not the scout's analyst voice
+        </div>
+      </div>
+
+      <div class="req-row">
+        <div class="req-diff"><strong>Zero tolerance</strong> for confidently wrong answers</div>
+        <div class="req-need">
+          <span class="req-icon">⊕</span>
+          A scope tight enough the agent never wanders
+        </div>
+      </div>
+
+      <div class="req-row">
+        <div class="req-diff">Same source of truth across every surface</div>
+        <div class="req-need">
+          <span class="req-icon">≡</span>
+          The same authoritative data foundation behind every answer
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: What stays / What changes -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">What's reused. What's rebuilt.</h2>
+    </div>
+    <p class="section-sub">
+      The good news: the data foundation already exists. What changes is the deployment shape.
+    </p>
+
+    <div class="deployment">
+      <article class="deploy-side stays">
+        <div class="deploy-tag">✓ Reused from Task 1</div>
+        <h3 class="deploy-title">The data foundation</h3>
+        <ul class="deploy-list">
+          <li class="deploy-item">
+            <span class="deploy-label">Stores</span>
+            <span class="deploy-value"><strong>MLB Rulebook</strong> · <strong>Player &amp; Team Profiles</strong></span>
+          </li>
+          <li class="deploy-item">
+            <span class="deploy-label">Re-ingestion</span>
+            <span class="deploy-value">None.</span>
+          </li>
+          <li class="deploy-item">
+            <span class="deploy-label">Cost</span>
+            <span class="deploy-value">No duplication.</span>
+          </li>
+        </ul>
+      </article>
+
+      <article class="deploy-side changes">
+        <div class="deploy-tag">↻ New for this task</div>
+        <h3 class="deploy-title">The deployment shape</h3>
+        <ul class="deploy-list">
+          <li class="deploy-item">
+            <span class="deploy-label">Surface</span>
+            <span class="deploy-value"><strong>CX Agent Studio</strong></span>
+          </li>
+          <li class="deploy-item">
+            <span class="deploy-label">Persona</span>
+            <span class="deploy-value">Fan ambassador <span style="color:var(--gc-grey-2);">(not scout analyst)</span></span>
+          </li>
+          <li class="deploy-item">
+            <span class="deploy-label">Scope</span>
+            <span class="deploy-value">History &amp; rules <span style="color:var(--gc-grey-2);">— explicitly not scores or live state</span></span>
+          </li>
+          <li class="deploy-item">
+            <span class="deploy-label">Posture</span>
+            <span class="deploy-value">Public-facing · multilingual · embeddable</span>
+          </li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- SECTION 4: The plan -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2 class="section-title">What you'll do</h2>
+    </div>
+
+    <div class="subtasks">
+      <div class="subtasks-header">
+        <span class="subtasks-title">Four subtasks</span>
+        <span class="subtasks-time"><strong>~30 minutes</strong> · last one optional</span>
+      </div>
+
+      <ul class="subtask-list">
+        <li class="subtask">
+          <span class="subtask-num">01</span>
+          <span class="subtask-text">Set up CX Agent Studio and <strong>create the agent application</strong></span>
+        </li>
+        <li class="subtask">
+          <span class="subtask-num">02</span>
+          <span class="subtask-text">Build the agent — <strong>connect the data foundation, configure the persona, set the scope</strong></span>
+        </li>
+        <li class="subtask">
+          <span class="subtask-num">03</span>
+          <span class="subtask-text">Test it in the simulator across <strong>English, multilingual, and out-of-scope</strong> scenarios</span>
+        </li>
+        <li class="subtask optional">
+          <span class="subtask-num">04</span>
+          <span class="subtask-text">Embed the agent in a <strong>sample fan page</strong></span>
+          <span class="subtask-badge">Optional</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Task 3 · The fan-facing agent</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>

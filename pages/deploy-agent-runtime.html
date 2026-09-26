@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deploy to Agent Runtime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-purple:  #9334E6;
+    --gc-purple-50: #F3E8FD;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 720px;
+    line-height: 1.55;
+  }
+
+  /* --- The problem: local vs prod --- */
+  .problem {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  .prob-side {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 30px 32px 28px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .prob-side.local::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gc-grey-3);
+  }
+  .prob-side.broken::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gc-red);
+  }
+
+  .prob-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .prob-side.local .prob-tag { color: var(--gc-grey-1); }
+  .prob-side.broken .prob-tag { color: var(--gc-red); }
+
+  .prob-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 14px;
+  }
+  .prob-cmd {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-ink-2);
+    background: var(--gc-grey-5);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    display: inline-block;
+    width: fit-content;
+  }
+  .prob-cmd .prompt { color: var(--gc-grey-2); }
+
+  .prob-desc {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+  }
+  .prob-desc strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+  .prob-side.broken .prob-desc strong { color: var(--gc-red); }
+
+  .prob-fine {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--gc-grey-4);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.04em;
+  }
+  .prob-fine strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  /* --- The stakeholders need it --- */
+  .stakeholders {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 28px 36px;
+    margin-bottom: 64px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+  .stake-context {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B06000;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .stake-text {
+    font-family: var(--font-display);
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--gc-ink-2);
+    letter-spacing: -0.005em;
+  }
+  .stake-text strong {
+    color: var(--gc-ink);
+    font-weight: 500;
+  }
+  .stake-roles {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .stake-role {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 100px;
+    background: var(--gc-yellow-50);
+    color: #B06000;
+    border: 1px solid var(--gc-yellow);
+    font-weight: 500;
+  }
+
+  /* --- The analogy: Agent Runtime is to ADK as Cloud Run is to web services --- */
+  .analogy {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 32px;
+  }
+  .analogy-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-blue);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .analogy-statement {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 28px;
+    max-width: 880px;
+  }
+  .analogy-statement strong {
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+
+  .analogy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .analogy-half {
+    padding: 24px 26px;
+    background: var(--gc-bg);
+  }
+  .analogy-half + .analogy-half {
+    border-left: 1px solid var(--gc-grey-3);
+    background: var(--gc-blue-50);
+  }
+  .analogy-half-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .analogy-half + .analogy-half .analogy-half-tag { color: var(--gc-blue); }
+
+  .analogy-half-pair {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--gc-ink);
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  .analogy-half-pair .arrow {
+    color: var(--gc-grey-2);
+    margin: 0 6px;
+  }
+  .analogy-half-desc {
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    line-height: 1.45;
+  }
+
+  /* --- The difference: what Agent Runtime knows --- */
+  .difference {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 32px 36px 36px;
+    margin-bottom: 64px;
+  }
+  .difference-head {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: -0.005em;
+    color: var(--gc-ink);
+    margin-bottom: 6px;
+  }
+  .difference-sub {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .difference-sub strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .difference-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .diff-item {
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 10px;
+    padding: 18px 18px 20px;
+    background: var(--gc-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .diff-item.agent { background: var(--gc-blue-50); border-color: #C6DAFC; }
+
+  .diff-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-2);
+    margin-bottom: 4px;
+  }
+  .diff-item.agent .diff-tag { color: var(--gc-blue); font-weight: 500; }
+
+  .diff-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--gc-ink);
+    letter-spacing: -0.005em;
+  }
+
+  /* --- The deploy step --- */
+  .deploy {
+    background: var(--gc-ink);
+    border-radius: 16px;
+    padding: 36px 40px;
+    color: white;
+  }
+  .deploy-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gc-yellow);
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .deploy-statement {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    color: white;
+    margin-bottom: 24px;
+    max-width: 880px;
+  }
+  .deploy-statement strong {
+    font-weight: 500;
+    color: var(--gc-yellow);
+  }
+
+  .deploy-flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .deploy-state {
+    text-align: center;
+  }
+  .deploy-state-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 10px;
+  }
+  .deploy-state-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    color: white;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+  .deploy-state-sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+  }
+  .deploy-state.endpoint .deploy-state-label { color: var(--gc-yellow); }
+  .deploy-state.endpoint .deploy-state-name { color: var(--gc-yellow); }
+
+  .deploy-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .deploy-arrow-cmd {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: white;
+    white-space: nowrap;
+  }
+  .deploy-arrow-line {
+    color: var(--gc-yellow);
+    font-size: 22px;
+  }
+
+  .deploy-foot {
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    text-align: center;
+  }
+  .deploy-foot strong {
+    color: white;
+    font-weight: 500;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+    .problem { grid-template-columns: 1fr; }
+    .stakeholders { grid-template-columns: 1fr; gap: 16px; }
+    .analogy-grid { grid-template-columns: 1fr; }
+    .analogy-half + .analogy-half { border-left: none; border-top: 1px solid var(--gc-grey-3); }
+    .difference-grid { grid-template-columns: repeat(2, 1fr); }
+    .deploy-flow { grid-template-columns: 1fr; gap: 16px; }
+    .deploy-arrow { transform: rotate(90deg); }
+    .deploy-arrow-cmd { transform: rotate(-90deg); }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .section-title { font-size: 22px; }
+    .difference-grid { grid-template-columns: 1fr; }
+    .deploy { padding: 28px 24px; }
+    .deploy-statement { font-size: 18px; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>Task 4</span>
+    <span class="sep">/</span>
+    <span>Agent Runtime</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Task 4 · From local to managed</span>
+      <h1>Close the terminal. <span class="accent">The agent stays.</span></h1>
+    </div>
+    <p class="lede">
+      Your agent works locally. Now make it survive past the Cloud Shell session — and give the whole front office a persistent endpoint to reach it.
+    </p>
+  </header>
+
+  <!-- SECTION 1: The problem -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Local works. It just isn't production.</h2>
+    </div>
+
+    <div class="problem">
+      <article class="prob-side local">
+        <div class="prob-tag">Today · Local</div>
+        <h3 class="prob-title">Running in Cloud Shell</h3>
+        <div class="prob-cmd"><span class="prompt">$ </span>adk web</div>
+        <p class="prob-desc">Agent queries BigQuery, runs BQML, hits the live MLB API.
+          <strong>Everything works.</strong></p>
+        <p class="prob-fine">Fine for <strong>development.</strong></p>
+      </article>
+
+      <article class="prob-side broken">
+        <div class="prob-tag">The catch</div>
+        <h3 class="prob-title">Close the terminal — agent's gone</h3>
+        <div class="prob-cmd"><span class="prompt">$ </span>exit</div>
+        <p class="prob-desc">No endpoint. No persistence. <strong>No one else can reach it.</strong></p>
+        <p class="prob-fine">Not fine for <strong>a tool the whole org needs.</strong></p>
+      </article>
+    </div>
+
+    <div class="stakeholders">
+      <div>
+        <div class="stake-context">Trade deadline week · Chaos</div>
+        <p class="stake-text">
+          Three groups need access during the chaos — <strong>especially when the developer who built it is busy doing something else:</strong>
+        </p>
+      </div>
+      <div class="stake-roles">
+        <span class="stake-role">Analytics team</span>
+        <span class="stake-role">Scouting team</span>
+        <span class="stake-role">GM's office</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: The analogy -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">If you know Cloud Run, you know this</h2>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">Agent Runtime</div>
+      <p class="analogy-statement">
+        Google Cloud's <strong>managed hosting platform for ADK agents.</strong>
+        The same relationship Cloud Run has to a general web service.
+      </p>
+
+      <div class="analogy-grid">
+        <div class="analogy-half">
+          <div class="analogy-half-tag">The pattern you know</div>
+          <div class="analogy-half-pair">Cloud Run <span class="arrow">→</span> web services</div>
+          <div class="analogy-half-desc">Your code stays your code. Google manages infrastructure. Persistent endpoint, autoscaling, observability — built in.</div>
+        </div>
+        <div class="analogy-half">
+          <div class="analogy-half-tag">The pattern you're learning</div>
+          <div class="analogy-half-pair">Agent Runtime <span class="arrow">→</span> ADK agents</div>
+          <div class="analogy-half-desc">Identical idea. Same code-stays-yours, infrastructure-stays-theirs deal. Just shaped around what agents specifically need.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: What's agent-specific -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">What it handles for you</h2>
+    </div>
+    <p class="section-sub">
+      Some of this is the standard managed-runtime deal. Some is specific to agents — concerns that would be your problem on a general-purpose runtime.
+    </p>
+
+    <div class="difference">
+      <h3 class="difference-head">Handled by the platform</h3>
+      <p class="difference-sub">Two are <strong>standard managed-runtime concerns.</strong> Two are <strong>agent-specific</strong> — and they're what makes Agent Runtime different from just deploying ADK to Cloud Run yourself.</p>
+
+      <div class="difference-grid">
+        <div class="diff-item">
+          <span class="diff-tag">Standard</span>
+          <div class="diff-name">Infrastructure &amp; scaling</div>
+        </div>
+        <div class="diff-item">
+          <span class="diff-tag">Standard</span>
+          <div class="diff-name">Observability</div>
+        </div>
+        <div class="diff-item agent">
+          <span class="diff-tag">Agent-specific</span>
+          <div class="diff-name">Session state</div>
+        </div>
+        <div class="diff-item agent">
+          <span class="diff-tag">Agent-specific</span>
+          <div class="diff-name">Tool invocations &amp; multi-turn reasoning</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: The deploy -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2 class="section-title">What you'll do</h2>
+    </div>
+
+    <div class="deploy">
+      <div class="deploy-label">★ One CLI command</div>
+      <p class="deploy-statement">
+        Take the <strong>exact agent you just finished</strong> and deploy it to Agent Runtime.
+        Same code, same tools, same capabilities — running on managed infrastructure.
+      </p>
+
+      <div class="deploy-flow">
+        <div class="deploy-state">
+          <div class="deploy-state-label">From</div>
+          <div class="deploy-state-name">Cloud Shell session</div>
+          <div class="deploy-state-sub">temporary · single user</div>
+        </div>
+        <div class="deploy-arrow">
+          <div class="deploy-arrow-cmd">$ deploy</div>
+          <div class="deploy-arrow-line">→</div>
+        </div>
+        <div class="deploy-state endpoint">
+          <div class="deploy-state-label">To</div>
+          <div class="deploy-state-name">Persistent endpoint</div>
+          <div class="deploy-state-sub">survives logout · anyone permissioned</div>
+        </div>
+      </div>
+
+      <p class="deploy-foot">
+        The endpoint <strong>anyone with the right permissions can reach</strong> —
+        not just the Cloud Shell session that built it.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Task 4 · Deploy to Agent Runtime</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Data Foundation · MLB Race to October</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gc-blue:    #4285F4;
+    --gc-red:     #EA4335;
+    --gc-yellow:  #FBBC04;
+    --gc-green:   #34A853;
+    --gc-blue-50: #E8F0FE;
+    --gc-red-50:  #FCE8E6;
+    --gc-yellow-50: #FEF7E0;
+    --gc-green-50: #E6F4EA;
+    --gc-ink:     #202124;
+    --gc-ink-2:   #3C4043;
+    --gc-grey-1:  #5F6368;
+    --gc-grey-2:  #80868B;
+    --gc-grey-3:  #DADCE0;
+    --gc-grey-4:  #E8EAED;
+    --gc-grey-5:  #F1F3F4;
+    --gc-bg:      #F8F9FA;
+    --gc-white:   #FFFFFF;
+    --font-display: 'Roboto', 'Google Sans', system-ui, sans-serif;
+    --font-body:    'Roboto', system-ui, sans-serif;
+    --font-mono:    'Roboto Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--gc-bg);
+    color: var(--gc-ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* --- Top bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-grey-1);
+    letter-spacing: 0.02em;
+    margin-bottom: 48px;
+  }
+  .gc-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--gc-ink-2);
+  }
+  .gc-dots { display: inline-flex; gap: 3px; }
+  .gc-dots span { width: 8px; height: 8px; border-radius: 50%; }
+  .gc-dots span:nth-child(1){ background: var(--gc-blue); }
+  .gc-dots span:nth-child(2){ background: var(--gc-red); }
+  .gc-dots span:nth-child(3){ background: var(--gc-yellow); }
+  .gc-dots span:nth-child(4){ background: var(--gc-green); }
+  .topbar .sep { color: var(--gc-grey-3); }
+
+  /* --- Hero --- */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 48px;
+    align-items: end;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gc-grey-3);
+    margin-bottom: 56px;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--gc-ink);
+  }
+  .hero h1 .accent { color: var(--gc-blue); }
+  .hero .lede {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--gc-grey-1);
+    max-width: 380px;
+    margin-left: auto;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gc-grey-1);
+    padding: 6px 12px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    margin-bottom: 24px;
+    background: var(--gc-white);
+  }
+
+  /* --- Section heads --- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--gc-grey-1);
+    margin-bottom: 32px;
+    max-width: 680px;
+    line-height: 1.55;
+  }
+
+  /* --- Stakes callout --- */
+  .stakes {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stakes::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg,
+      var(--gc-blue) 0%, var(--gc-blue) 33%,
+      var(--gc-green) 33%, var(--gc-green) 66%,
+      var(--gc-yellow) 66%, var(--gc-yellow) 100%);
+  }
+  .stakes-statement {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+    max-width: 880px;
+  }
+  .stakes-statement strong {
+    font-weight: 500;
+    color: var(--gc-blue);
+  }
+  .stakes-statement .right { color: var(--gc-green); font-weight: 500; }
+  .stakes-statement .wrong { color: var(--gc-red); font-weight: 500; }
+
+  /* --- The two layers --- */
+  .layers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  .layer {
+    background: var(--gc-white);
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 32px 32px 28px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .layer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .layer-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .layer.retrieval .layer-tag { color: var(--gc-blue); }
+  .layer.analytical .layer-tag { color: var(--gc-green); }
+
+  .layer-step {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.08em;
+  }
+
+  .layer-name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    color: var(--gc-ink);
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+  .layer-howto {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .layer-howto strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .layer-contains-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-2);
+    margin-bottom: 10px;
+  }
+  .layer-contains {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .data-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--gc-grey-3);
+    background: var(--gc-grey-5);
+    color: var(--gc-ink-2);
+  }
+  .layer.retrieval .data-tag {
+    background: var(--gc-blue-50);
+    border-color: #C6DAFC;
+    color: #1967D2;
+  }
+  .layer.analytical .data-tag {
+    background: var(--gc-green-50);
+    border-color: #B7E1C3;
+    color: #137333;
+  }
+
+  .layer-divider {
+    height: 1px;
+    background: var(--gc-grey-4);
+    margin: 4px 0 18px;
+  }
+
+  .layer-answers-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gc-grey-2);
+    margin-bottom: 10px;
+  }
+  .layer-answers {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .layer-answers li {
+    font-family: var(--font-display);
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--gc-ink-2);
+    padding-left: 18px;
+    position: relative;
+  }
+  .layer-answers li::before {
+    content: "“";
+    position: absolute;
+    left: 0;
+    top: -4px;
+    font-size: 22px;
+    color: var(--gc-grey-3);
+    line-height: 1;
+  }
+
+  /* --- The third source (live) --- */
+  .live {
+    background: var(--gc-white);
+    border: 1px dashed var(--gc-grey-3);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 72px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+  }
+  .live-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--gc-yellow-50);
+    border: 1px solid var(--gc-yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .live-icon::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gc-yellow);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  .live-text { line-height: 1.5; }
+  .live-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B06000;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .live-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--gc-ink);
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+  .live-desc {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    max-width: 580px;
+  }
+  .live-desc strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  .live-when {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--gc-grey-1);
+    padding: 8px 14px;
+    border: 1px solid var(--gc-grey-3);
+    border-radius: 100px;
+    background: var(--gc-bg);
+    white-space: nowrap;
+  }
+
+  /* --- Why retrieval first --- */
+  .why-first {
+    background: var(--gc-grey-5);
+    border-radius: 12px;
+    padding: 22px 26px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: -40px;
+    margin-bottom: 56px;
+  }
+  .why-first-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--gc-blue);
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .why-first-text {
+    font-size: 14px;
+    color: var(--gc-grey-1);
+    line-height: 1.5;
+  }
+  .why-first-text strong {
+    color: var(--gc-ink-2);
+    font-weight: 500;
+  }
+
+  /* --- Closing --- */
+  .closing {
+    margin-top: 16px;
+    text-align: center;
+    padding: 0 40px;
+  }
+  .closing p {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 1.45;
+    color: var(--gc-ink-2);
+    letter-spacing: -0.005em;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .closing p em {
+    font-style: normal;
+    color: var(--gc-blue);
+    font-weight: 500;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gc-grey-3);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gc-grey-2);
+    letter-spacing: 0.02em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { margin-left: 0; }
+    .layers { grid-template-columns: 1fr; }
+    .live { grid-template-columns: auto 1fr; }
+    .live-when { grid-column: 1 / -1; justify-self: start; }
+  }
+  @media (max-width: 560px) {
+    .page { padding: 32px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .stakes { padding: 28px; }
+    .stakes-statement { font-size: 18px; }
+    .section-title { font-size: 22px; }
+    .layer { padding: 26px 22px; }
+    .live { padding: 22px; }
+    .why-first { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .footer { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- Top brand bar -->
+  <div class="topbar">
+    <span class="gc-mark">
+      <span class="gc-dots"><span></span><span></span><span></span><span></span></span>
+      Google Cloud
+    </span>
+    <span class="sep">/</span>
+    <span>Task 1</span>
+    <span class="sep">/</span>
+    <span>The Data Foundation</span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div>
+      <span class="eyebrow">Before any agent · Task 1</span>
+      <h1>The <span class="accent">Data Foundation</span> every agent stands on</h1>
+    </div>
+    <p class="lede">
+      Front-office chat, fan assistant, pro-code data controller — they all sit on top of
+      the same data. What you stage now decides what they can answer later.
+    </p>
+  </header>
+
+  <!-- SECTION 1: The stakes -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Why this task comes first</h2>
+    </div>
+    <div class="stakes">
+      <p class="stakes-statement">
+        Every agent in this lab sits on the foundation you build here.
+        Get it <span class="right">right</span> and your agents are useful.
+        Get it <span class="wrong">wrong</span> and they
+        <strong style="color: var(--gc-red); font-weight: 500;">hallucinate confidently</strong>
+        when the stakes are highest.
+      </p>
+    </div>
+  </section>
+
+  <!-- SECTION 2: The two pre-staged layers -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Build the foundation in two halves</h2>
+    </div>
+    <p class="section-sub">
+      Two layers, two shapes of data, two kinds of question they unlock.
+      Both can be pre-staged before any agent is built.
+    </p>
+
+    <div class="layers">
+
+      <!-- Layer 1: Retrieval -->
+      <article class="layer retrieval">
+        <div class="layer-top">
+          <span class="layer-tag">Layer 01 · Retrieval</span>
+          <span class="layer-step">Built first</span>
+        </div>
+        <h3 class="layer-name">Documents, searched by meaning</h3>
+        <p class="layer-howto">Unstructured text, <strong>indexed for semantic search.</strong> Powers chat-style agents.</p>
+
+        <div class="layer-contains-label">Contains</div>
+        <div class="layer-contains">
+          <span class="data-tag">MLB Rulebook</span>
+          <span class="data-tag">Scouting Profiles</span>
+          <span class="data-tag">Historical Records</span>
+        </div>
+
+        <div class="layer-divider"></div>
+
+        <div class="layer-answers-label">Answers questions like</div>
+        <ul class="layer-answers">
+          <li>What are the waiver rules?</li>
+          <li>Tell me about Hank Aaron's career.</li>
+        </ul>
+      </article>
+
+      <!-- Layer 2: Analytical -->
+      <article class="layer analytical">
+        <div class="layer-top">
+          <span class="layer-tag">Layer 02 · Analytical</span>
+          <span class="layer-step">Built next</span>
+        </div>
+        <h3 class="layer-name">Structured data, computed and predicted</h3>
+        <p class="layer-howto">Rows, columns, and ML models. <strong>Queried and modeled on.</strong> Powers analytical agents.</p>
+
+        <div class="layer-contains-label">Contains</div>
+        <div class="layer-contains">
+          <span class="data-tag">Team Records</span>
+          <span class="data-tag">Player Statistics</span>
+          <span class="data-tag">Playoff Probability Model</span>
+        </div>
+
+        <div class="layer-divider"></div>
+
+        <div class="layer-answers-label">Answers questions like</div>
+        <ul class="layer-answers">
+          <li>Which teams are most likely to make the postseason?</li>
+          <li>How do these two players compare statistically?</li>
+        </ul>
+      </article>
+
+    </div>
+
+    <!-- Why retrieval first -->
+    <div class="why-first">
+      <span class="why-first-num">↑</span>
+      <p class="why-first-text">
+        <strong>Start with retrieval.</strong> Document ingestion takes time —
+        kick it off first and the index will be ready by the time the structured layer is loaded and modeled.
+      </p>
+    </div>
+  </section>
+
+  <!-- SECTION 3: The third source (live, deferred) -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">A third source, arriving later</h2>
+    </div>
+    <p class="section-sub">
+      Some data can't be pre-staged. Current standings, today's scores, in-season stats — these
+      have to be fetched the moment a question is asked.
+    </p>
+
+    <div class="live">
+      <div class="live-icon"></div>
+      <div class="live-text">
+        <div class="live-label">Live · Fetched on demand</div>
+        <div class="live-title">MLB Stats API</div>
+        <div class="live-desc">
+          Today's scores · current standings · in-season player stats.
+          <strong>Not pre-staged</strong> — the agent that needs it fetches it at the moment the question is asked.
+        </div>
+      </div>
+      <div class="live-when">Added in Task 4</div>
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="closing">
+    <p>
+      Where data lives matters as much as
+      <em>what data you have.</em>
+    </p>
+  </section>
+
+  <footer class="footer">
+    <span>Task 1 · The Data Foundation</span>
+    <span>Built on Google Cloud</span>
+  </footer>
+
+</main>
+</body>
+</html>
